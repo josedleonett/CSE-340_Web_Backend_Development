@@ -1,0 +1,26 @@
+<%- include('partials/header') %>
+
+    <section class="hero">
+      <h2><%= title %></h2>
+      <p>Welcome to the Service Project Tracker. This application helps organizations manage and track their community service projects.</p>
+    </section>
+
+    <section class="features">
+      <div class="feature-card">
+        <h3>Organizations</h3>
+        <p>View and manage participating organizations in our community service network.</p>
+        <a href="/organizations" class="btn">View Organizations</a>
+      </div>
+      <div class="feature-card">
+        <h3>Service Projects</h3>
+        <p>Browse ongoing and completed service projects in your community.</p>
+        <a href="/projects" class="btn">View Projects</a>
+      </div>
+      <div class="feature-card">
+        <h3>Categories</h3>
+        <p>Explore different types of service project categories available.</p>
+        <a href="/categories" class="btn">View Categories</a>
+      </div>
+    </section>
+
+<%- include('partials/footer') %>
