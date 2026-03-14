@@ -1,0 +1,35 @@
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Server",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/server.js",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "env": {
+                "NODE_ENV": "development"
+            }
+        },
+        {
+            "name": "Launch via npm start",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["start"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Launch via npm dev",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run", "dev"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        }
+    ]
+}
