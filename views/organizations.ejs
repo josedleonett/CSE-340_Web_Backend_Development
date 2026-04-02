@@ -9,7 +9,7 @@
       <% organizations.forEach(org => { %>
       <div class="org-card">
         <img src="/images/org-placeholder.svg" alt="<%= org.organization_name %>">
-        <h3><%= org.organization_name %></h3>
+        <h3><a href="/organization/<%= org.organization_id %>"><%= org.organization_name %></a></h3>
         <p><%= org.mission %></p>
       </div>
       <% }) %>

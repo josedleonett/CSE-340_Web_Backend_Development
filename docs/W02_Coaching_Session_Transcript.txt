@@ -1,0 +1,318 @@
+W02 Coaching Session: Database Retrieval
+==========================================
+Date: April 2, 2026
+Student: Jose Leonett
+Course: CSE 340 - Web Backend Development
+
+==========================================
+TRANSCRIPT
+==========================================
+
+AI Coach:
+Welcome! Just to be clear from the start, this is a coaching session, not a test.
+It is perfectly okay — and even encouraged — to say "I don't know" or "I made a
+mistake." That's the fastest way we'll learn today.
+
+My name is your Learning Coach and Software Mentor. Before we dive in, could you
+tell me your name so I can personalize our session?
+
+Student:
+My name is Jose.
+
+AI Coach:
+Great to meet you, Jose! Remember, this is a safe space — there are no wrong
+answers here, only learning opportunities. Let's get started.
+
+To kick things off, I'd love to hear about the project you built this week.
+Can you give me a quick overview of what your application does?
+
+Student:
+I built a Service Project Tracker. It is a web application that shows volunteer
+service projects organized by different community organizations. Users can browse
+organizations, view all projects, and also look at projects by category. The data
+is stored in a PostgreSQL database and the app uses Node.js with Express and EJS
+to display everything.
+
+AI Coach:
+That sounds like a great project, Jose! You mentioned organizations, projects, and
+categories. Let's start by talking about how you designed your database.
+
+Can you explain the purpose of each table you created and how they relate to each
+other? Feel free to paste a SQL snippet to support your explanation.
+
+---
+TOPIC 1: Relational Database Design and Structure
+---
+
+Student:
+Sure! I have three main tables: organizations, projects, and categories. I also
+have a junction table called project_categories to handle the many-to-many
+relationship between projects and categories.
+
+Here is the SQL I used to create the tables:
+
+-- Organizations table
+CREATE TABLE IF NOT EXISTS organizations (
+  organization_id SERIAL PRIMARY KEY,
+  organization_name VARCHAR(255) NOT NULL,
+  mission TEXT,
+  contact_email VARCHAR(255),
+  phone VARCHAR(20)
+);
+
+-- Projects table
+CREATE TABLE IF NOT EXISTS projects (
+  project_id SERIAL PRIMARY KEY,
+  organization_id INT NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  location VARCHAR(255),
+  date DATE,
+  FOREIGN KEY (organization_id) REFERENCES organizations(organization_id)
+);
+
+-- Categories table
+CREATE TABLE IF NOT EXISTS categories (
+  category_id SERIAL PRIMARY KEY,
+  category_name VARCHAR(255) NOT NULL UNIQUE
+);
+
+-- Project-categories junction table (many-to-many)
+CREATE TABLE IF NOT EXISTS project_categories (
+  project_id INT NOT NULL,
+  category_id INT NOT NULL,
+  PRIMARY KEY (project_id, category_id),
+  FOREIGN KEY (project_id) REFERENCES projects(project_id),
+  FOREIGN KEY (category_id) REFERENCES categories(category_id)
+);
+
+The organizations table is the parent — each organization can have many projects.
+The projects table has a FOREIGN KEY pointing to organization_id in organizations,
+which creates a one-to-many relationship. One organization can run many projects,
+but each project belongs to only one organization.
+
+For categories, a project can belong to multiple categories (like
+"Environmental" AND "Community Service"), and a category can have many projects.
+That is why I used the project_categories junction table with a composite PRIMARY KEY.
+
+AI Coach:
+Excellent explanation, Jose! You clearly understand the difference between
+one-to-many and many-to-many relationships, and you used the right approach with
+a junction table.
+
+I noticed you used SERIAL PRIMARY KEY for your IDs. Can you tell me what SERIAL
+does in PostgreSQL and why it is useful?
+
+Student:
+SERIAL is a shortcut in PostgreSQL that automatically creates an auto-incrementing
+integer. Every time a new row is inserted, the database automatically assigns the
+next number as the ID without me having to specify it manually. It is useful because
+it guarantees each row has a unique identifier without any extra code in the
+application.
+
+AI Coach:
+Exactly right! SERIAL simplifies primary key management. Now let's move to how
+you access that data from Node.js.
+
+---
+TOPIC 2: Server-Side Data Access Logic (Node.js)
+---
+
+AI Coach:
+Can you walk me through how your Node.js code retrieves data from the database?
+What function did you write, and what does it do step by step?
+
+Student:
+I created model files inside src/models/. Here is the getAllProjects() function
+from src/models/projects.js:
+
+import pool from '../database.js';
+
+export async function getAllProjects() {
+  try {
+    const result = await pool.query(`
+      SELECT
+        p.project_id,
+        p.title,
+        p.description,
+        p.location,
+        p.date,
+        o.organization_name
+      FROM projects p
+      JOIN organizations o ON p.organization_id = o.organization_id
+      ORDER BY p.date DESC
+    `);
+    return result.rows;
+  } catch (error) {
+    console.error('Error getting projects:', error);
+    throw error;
+  }
+}
+
+The function is async because it talks to the database, which takes time. I import
+a pool from database.js, which is a PostgreSQL connection pool created using the
+pg library. pool.query() sends the SQL to the database and returns a result object.
+result.rows is the array of rows that came back.
+
+The SQL uses a JOIN to combine the projects table with the organizations table so
+that the organization name is included in each row without needing two separate
+queries. This is more efficient.
+
+If anything goes wrong I catch the error, log it, and throw it again so the route
+handler can catch it and send a proper error response to the browser.
+
+AI Coach:
+Great job explaining that! You mentioned a connection pool in database.js.
+Why do you use a pool instead of a single connection?
+
+Student:
+A pool keeps multiple database connections open and ready to use. If multiple users
+visit the app at the same time, each request can use its own connection from the
+pool instead of waiting. Creating a new connection every time a request comes in
+would be slow because the TCP handshake and authentication take time. A pool
+recycles connections, which is much more efficient for a web app.
+
+AI Coach:
+Perfect reasoning, Jose. That's a key concept in backend scalability. Now let's
+talk about how Express ties everything together.
+
+---
+TOPIC 3: Express Server Logic and Routing
+---
+
+AI Coach:
+Can you explain the role of the route handler in Express? Please share a relevant
+route from your server.js.
+
+Student:
+The route handler in Express is a function that runs when the server receives a
+request to a specific URL path. It is responsible for getting the data, then
+passing it to the view to render.
+
+Here is the /projects route from my server.js:
+
+app.get('/projects', async (req, res) => {
+  try {
+    const projects = await projectsModel.getAllProjects();
+    res.render('projects', { title: 'Service Projects', projects });
+  } catch (error) {
+    console.error('Error retrieving projects:', error);
+    res.status(500).render('projects', {
+      title: 'Service Projects',
+      projects: [],
+      error: 'Error retrieving projects from database'
+    });
+  }
+});
+
+app.get() registers a handler for GET requests to the path '/projects'. When a
+browser visits that URL, Express calls the function with req (the request) and
+res (the response).
+
+Inside the function, I call getAllProjects() and await the result because it is async.
+Then I call res.render() which tells Express to use the 'projects' EJS template and
+pass it the data as a JavaScript object. The template uses the title and projects
+variables to build the HTML.
+
+If something goes wrong, the catch block sends a 500 status and renders the same
+page with an empty projects array and an error message, so the user still sees a
+page instead of a crash.
+
+AI Coach:
+Excellent, Jose. You clearly understand the request-response cycle. One follow-up:
+why do you pass the data as an object like { title: 'Service Projects', projects }
+instead of just passing the array?
+
+Student:
+Because res.render() accepts a single JavaScript object where each key becomes a
+variable available in the EJS template. By passing an object, I can send multiple
+pieces of data at once — the page title and the projects array. If I passed just
+the array, the template would not know what to call it and I could not pass the
+title at the same time.
+
+AI Coach:
+Exactly right! This is the standard pattern for passing data from Express to EJS.
+Let me now ask you about the template itself.
+
+---
+TOPIC 4: Client-Side Rendering (EJS Templates)
+---
+
+AI Coach:
+Can you explain how EJS uses the data you send from Express? Please share a snippet
+from one of your EJS template files.
+
+Student:
+EJS stands for Embedded JavaScript. It lets me write regular HTML with special tags
+that execute JavaScript, making the page dynamic.
+
+Here is the relevant part of my views/organizations.ejs:
+
+<section class="organizations-grid">
+  <% organizations.forEach(org => { %>
+  <div class="org-card">
+    <img src="/images/org-placeholder.svg" alt="<%= org.organization_name %>">
+    <h3><%= org.organization_name %></h3>
+    <p><%= org.mission %></p>
+  </div>
+  <% }) %>
+</section>
+
+There are two types of EJS tags I used here:
+
+1. <% %> — executes JavaScript code but does not print anything. I use this for
+   the forEach loop that iterates over the organizations array.
+
+2. <%= %> — executes JavaScript AND outputs the result into the HTML. I use this
+   to print org.organization_name and org.mission for each organization.
+
+When Express calls res.render('organizations', { organizations }), EJS takes the
+organizations array and processes the template. For each object in the array, it
+creates a new <div class="org-card"> block with the actual data values inserted.
+The final HTML sent to the browser has no EJS tags at all — they are all replaced
+with real data.
+
+AI Coach:
+That's a clear and complete explanation of EJS rendering. You correctly identified
+both tag types and explained how the data flows from the route handler into the
+template.
+
+One last question: why is it important that EJS runs on the server instead of in
+the browser?
+
+Student:
+Because the data comes from the database, which only the server can access. If
+rendering happened in the browser, I would have to expose the database connection
+or create a separate API endpoint. Running EJS on the server means the database
+query, the data processing, and the HTML generation all happen in one place. The
+browser only receives finished HTML, which is simpler and more secure — users
+cannot see the database query logic or the connection credentials.
+
+AI Coach:
+Excellent point about security and separation of concerns, Jose. You've demonstrated
+a solid understanding of the full data flow: from the database schema, through the
+Node.js model, through the Express route, and finally rendered in EJS.
+
+You have successfully covered all four required topics for this coaching session:
+
+1. Relational Database Design and Structure — COMPLETE
+   You explained the purpose of each table, one-to-many and many-to-many
+   relationships, and shared the SQL CREATE TABLE statements with proper
+   PRIMARY KEY and FOREIGN KEY constraints.
+
+2. Server-Side Data Access Logic (Node.js) — COMPLETE
+   You walked through getAllProjects(), explained async/await, connection pools,
+   and the JOIN query.
+
+3. Express Server Logic and Routing — COMPLETE
+   You explained the route handler, path mapping, res.render(), and error handling.
+
+4. Client-Side Rendering (EJS Templates) — COMPLETE
+   You explained EJS tag types, data flow from Express to the template, and why
+   server-side rendering is important.
+
+Great work today, Jose! This coaching session is complete.
+
+==========================================
+END OF SESSION
+==========================================

@@ -1,0 +1,40 @@
+<%- include('partials/header') %>
+
+    <section class="page-header">
+      <h2><%= title %></h2>
+    </section>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <section class="error-message">
+        <p><%= error %></p>
+      </section>
+    <% } %>
+
+    <% if (organizationDetails) { %>
+      <section class="organization-details">
+        <h3><%= organizationDetails.organization_name %></h3>
+        <p><%= organizationDetails.mission %></p>
+        <p><strong>Email:</strong> <%= organizationDetails.contact_email %></p>
+        <p><strong>Phone:</strong> <%= organizationDetails.phone %></p>
+      </section>
+
+      <section class="organization-projects">
+        <h3>Service Projects</h3>
+        <% if (projects && projects.length > 0) { %>
+          <ul>
+            <% projects.forEach(project => { %>
+              <li>
+                <a href="/project/<%= project.project_id %>"><%= project.title %></a>
+                — <%= new Date(project.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+              </li>
+            <% }); %>
+          </ul>
+        <% } else { %>
+          <p>No service projects available for this organization.</p>
+        <% } %>
+      </section>
+    <% } else { %>
+      <p>Organization not found.</p>
+    <% } %>
+
+<%- include('partials/footer') %>

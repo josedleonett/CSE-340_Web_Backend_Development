@@ -13,3 +13,18 @@ export async function getAllOrganizations() {
     throw error;
   }
 }
+
+export async function getOrganizationDetails(organizationId) {
+  try {
+    const result = await pool.query(
+      `SELECT organization_id, organization_name, mission, contact_email, phone
+       FROM organizations
+       WHERE organization_id = $1`,
+      [organizationId]
+    );
+    return result.rows.length > 0 ? result.rows[0] : null;
+  } catch (error) {
+    console.error('Error getting organization details:', error);
+    throw error;
+  }
+}
