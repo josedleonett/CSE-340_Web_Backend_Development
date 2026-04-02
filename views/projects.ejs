@@ -5,31 +5,26 @@
       <p>Current and upcoming service projects in our community.</p>
     </section>
 
+    <% if (typeof error !== 'undefined' && error) { %>
+      <section class="error-message">
+        <p><%= error %></p>
+      </section>
+    <% } %>
+
     <section class="projects-list">
-      <div class="project-card">
-        <h3>Park Cleanup Day</h3>
-        <span class="project-category">Environmental</span>
-        <p>Join us for a community cleanup at Central Park. We will be picking up litter, planting flowers, and maintaining trails.</p>
-        <p><strong>Date:</strong> March 20, 2026</p>
-      </div>
-      <div class="project-card">
-        <h3>Food Bank Volunteer Day</h3>
-        <span class="project-category">Community Service</span>
-        <p>Help sort and distribute food to families in need at the local food bank.</p>
-        <p><strong>Date:</strong> March 25, 2026</p>
-      </div>
-      <div class="project-card">
-        <h3>Tutoring Program</h3>
-        <span class="project-category">Educational</span>
-        <p>Volunteer to tutor students in math and reading at the community center.</p>
-        <p><strong>Date:</strong> Ongoing - Every Saturday</p>
-      </div>
-      <div class="project-card">
-        <h3>Senior Center Visit</h3>
-        <span class="project-category">Health and Wellness</span>
-        <p>Spend time with seniors, play games, and provide companionship at the local senior center.</p>
-        <p><strong>Date:</strong> April 5, 2026</p>
-      </div>
+      <% if (projects && projects.length > 0) { %>
+        <% projects.forEach(project => { %>
+          <div class="project-card">
+            <h3><%= project.title %></h3>
+            <span class="project-organization"><%= project.organization_name %></span>
+            <p><%= project.description %></p>
+            <p><strong>Location:</strong> <%= project.location %></p>
+            <p><strong>Date:</strong> <%= new Date(project.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p>No service projects available at this time.</p>
+      <% } %>
     </section>
 
 <%- include('partials/footer') %>

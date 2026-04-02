@@ -1,0 +1,156 @@
+W01 COACHING SESSION TRANSCRIPT
+================================
+CSE 340 - Web Backend Development
+Date: March 14, 2026
+Student: Jose Leonett
+
+================================================================================
+TOPIC 1: EXPRESS ROUTING
+================================================================================
+
+COACH: Let's start with Express routing. In your server.js, you have routes like:
+
+    app.get('/', (req, res) => {
+        res.render('index', { title: 'Home' });
+    });
+
+Can you explain what happens when a user visits the root URL ('/') of your site?
+
+STUDENT: When a user visits the root URL, Express catches that GET request and 
+executes the callback function. The callback receives `req` (the request object 
+with information about the incoming request) and `res` (the response object used 
+to send data back). Then `res.render()` renders the 'index' EJS template and 
+passes the `title` variable to it.
+
+COACH: Excellent! You understand the request-response cycle well. Why do you 
+think we use `app.get()` instead of `app.post()` for these routes?
+
+STUDENT: We use `app.get()` because we are retrieving pages to display. GET 
+requests are for reading data. POST requests would be used when we need to send 
+data to the server, like submitting a form to create or update something in a 
+database.
+
+COACH: Perfect explanation. The distinction between GET (read) and POST (write) 
+is fundamental to HTTP and RESTful design.
+
+================================================================================
+TOPIC 2: JAVASCRIPT PRINCIPLES
+================================================================================
+
+COACH: Looking at your code, I see you consistently use `const` for declarations. 
+Why is `const` preferred over `let` or `var`?
+
+STUDENT: `const` is preferred because it prevents reassignment of variables. This 
+makes the code more predictable and catches errors early. If I try to reassign a 
+`const` variable, I'll get an error immediately. We use `let` only when we know 
+the value needs to change. `var` is avoided because it has function scope instead 
+of block scope, which can cause confusing bugs.
+
+COACH: Right! And I notice your package.json has `"type": "module"`. What does 
+this enable?
+
+STUDENT: This enables ESM (ECMAScript Modules) syntax. So instead of using 
+`require()` like in CommonJS, I can use `import` and `export` statements. For 
+example, in server.js I have:
+
+    import express from 'express';
+    import path from 'path';
+
+This is the modern JavaScript standard and works the same way in the browser and 
+Node.js.
+
+COACH: Great understanding! And why do we prefer arrow functions like 
+`(req, res) => {}` over traditional functions?
+
+STUDENT: Arrow functions provide a cleaner, more concise syntax. They also don't 
+create their own `this` binding, which avoids common bugs with callback functions. 
+For route handlers and callbacks, arrow functions are ideal because they're 
+shorter and we don't need a separate `this` context.
+
+================================================================================
+TOPIC 3: EJS PARTIALS AND PAGES
+================================================================================
+
+COACH: Your views use partials like this:
+
+    <%- include('partials/header') %>
+
+Why do you use `<%-` instead of `<%=`?
+
+STUDENT: The `<%-` syntax outputs unescaped HTML, which is what we need for 
+including partials. The partial contains HTML tags that should be rendered as 
+actual HTML elements. If I used `<%=`, it would escape the HTML and show the 
+literal tag characters like `&lt;nav&gt;` instead of rendering the navigation.
+
+I use `<%=` when outputting variables that should be escaped, like:
+
+    <title><%= title %> | CSE 340</title>
+
+This prevents XSS attacks if the variable contained malicious script tags.
+
+COACH: Excellent security awareness! How do partials help with code maintenance?
+
+STUDENT: Partials follow the DRY principle (Don't Repeat Yourself). My header 
+and footer appear on all four pages, so instead of copying the same HTML four 
+times, I define it once in the partials folder. If I need to add a new navigation 
+link, I only change header.ejs and all pages update automatically. This reduces 
+errors and makes the codebase easier to maintain.
+
+================================================================================
+TOPIC 4: FRONTEND CSS
+================================================================================
+
+COACH: I see you're using CSS custom properties (variables) in your stylesheet:
+
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --bg-color: #f8f9fa;
+        --text-color: #333;
+    }
+
+What's the benefit of this approach?
+
+STUDENT: CSS variables defined in `:root` are available throughout the entire 
+stylesheet. If I want to change the primary color of my site, I only need to 
+update it in one place. This maintains consistency across all elements using 
+that color and makes theming or rebranding much easier. The `:root` selector 
+refers to the root element of the document (the `<html>` element).
+
+COACH: And what about responsive design? I see you have media queries.
+
+STUDENT: Yes, I have a media query for mobile devices:
+
+    @media (max-width: 768px) {
+        .nav-links {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        ...
+    }
+
+This changes the navigation from a horizontal row to a vertical stack when the 
+screen width is 768 pixels or less. Mobile-first design and responsive layouts 
+are essential because users access websites from many different devices. The 
+flexbox and grid properties I use adapt well to different screen sizes.
+
+================================================================================
+SESSION SUMMARY
+================================================================================
+
+Topics Covered:
++-------------------+----------------------------------------------------------+
+| Topic             | Key Concepts Discussed                                   |
++-------------------+----------------------------------------------------------+
+| Express Routing   | app.get(), req/res objects, GET vs POST methods          |
+| JavaScript        | const vs let/var, ESM imports, arrow functions           |
+| EJS Partials      | <%- %> vs <%= %>, include(), DRY principle               |
+| Frontend CSS      | CSS variables, :root selector, media queries, responsive |
++-------------------+----------------------------------------------------------+
+
+All four required topics have been discussed with code examples from the 
+student's own project implementation.
+
+================================================================================
+END OF COACHING SESSION
+================================================================================
