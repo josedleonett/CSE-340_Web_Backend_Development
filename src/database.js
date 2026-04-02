@@ -2,7 +2,7 @@ import pkg from 'pg';
 import dotenv from 'dotenv';
 
 const { Pool } = pkg;
-dotenv.config();
+dotenv.config({ override: true });
 
 const pool = new Pool({
   host: process.env.DB_HOST,

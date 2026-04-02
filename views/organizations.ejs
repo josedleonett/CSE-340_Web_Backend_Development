@@ -6,21 +6,13 @@
     </section>
 
     <section class="organizations-grid">
+      <% organizations.forEach(org => { %>
       <div class="org-card">
-        <img src="/images/org-placeholder.svg" alt="Community Helpers">
-        <h3>Community Helpers</h3>
-        <p>A local organization dedicated to helping neighbors in need through various community initiatives.</p>
+        <img src="/images/org-placeholder.svg" alt="<%= org.organization_name %>">
+        <h3><%= org.organization_name %></h3>
+        <p><%= org.mission %></p>
       </div>
-      <div class="org-card">
-        <img src="/images/org-placeholder.svg" alt="Youth Volunteers">
-        <h3>Youth Volunteers</h3>
-        <p>Empowering young people to make a difference in their communities through volunteer work.</p>
-      </div>
-      <div class="org-card">
-        <img src="/images/org-placeholder.svg" alt="Green Earth Initiative">
-        <h3>Green Earth Initiative</h3>
-        <p>Focused on environmental conservation and sustainability projects in the local area.</p>
-      </div>
+      <% }) %>
     </section>
 
 <%- include('partials/footer') %>

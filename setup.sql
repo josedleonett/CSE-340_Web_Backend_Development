@@ -52,3 +52,91 @@ VALUES
   (3, 'Urban Garden Development', 'Develop sustainable urban gardens in underserved neighborhoods.', 'Downtown District', '2026-04-09'),
   (3, 'Composting Workshop', 'Teach community members how to compost and reduce waste.', 'Environmental Center', '2026-04-14')
 ON CONFLICT DO NOTHING;
+
+-- Categories table
+CREATE TABLE IF NOT EXISTS categories (
+  category_id SERIAL PRIMARY KEY,
+  category_name VARCHAR(255) NOT NULL UNIQUE
+);
+
+-- Project-categories junction table (many-to-many)
+CREATE TABLE IF NOT EXISTS project_categories (
+  project_id INT NOT NULL,
+  category_id INT NOT NULL,
+  PRIMARY KEY (project_id, category_id),
+  FOREIGN KEY (project_id) REFERENCES projects(project_id),
+  FOREIGN KEY (category_id) REFERENCES categories(category_id)
+);
+
+-- Sample data for categories
+INSERT INTO categories (category_name)
+VALUES
+  ('Environmental'),
+  ('Educational'),
+  ('Community Service'),
+  ('Health and Wellness'),
+  ('Youth Development'),
+  ('Technology'),
+  ('Arts and Culture')
+ON CONFLICT DO NOTHING;
+
+-- Associate each project with at least one category
+INSERT INTO project_categories (project_id, category_id)
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Park Cleanup Day' AND c.category_name = 'Environmental'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Park Cleanup Day' AND c.category_name = 'Community Service'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Food Bank Volunteer Day' AND c.category_name = 'Community Service'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Senior Center Visit' AND c.category_name = 'Health and Wellness'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Senior Center Visit' AND c.category_name = 'Community Service'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Community Garden Planting' AND c.category_name = 'Environmental'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Paint Local School' AND c.category_name = 'Community Service'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Paint Local School' AND c.category_name = 'Educational'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Beach Cleanup' AND c.category_name = 'Environmental'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Tutoring Program' AND c.category_name = 'Educational'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Tutoring Program' AND c.category_name = 'Youth Development'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Youth Sports Day' AND c.category_name = 'Youth Development'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Youth Sports Day' AND c.category_name = 'Health and Wellness'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'After School Mentoring' AND c.category_name = 'Educational'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'After School Mentoring' AND c.category_name = 'Youth Development'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Career Fair Planning' AND c.category_name = 'Educational'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Career Fair Planning' AND c.category_name = 'Youth Development'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Youth Art Workshop' AND c.category_name = 'Arts and Culture'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Youth Art Workshop' AND c.category_name = 'Youth Development'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Tech Skills Training' AND c.category_name = 'Technology'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Tech Skills Training' AND c.category_name = 'Youth Development'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Tree Planting Initiative' AND c.category_name = 'Environmental'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Recycling Education' AND c.category_name = 'Environmental'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Recycling Education' AND c.category_name = 'Educational'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'River Cleanup' AND c.category_name = 'Environmental'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Urban Garden Development' AND c.category_name = 'Environmental'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Urban Garden Development' AND c.category_name = 'Community Service'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Composting Workshop' AND c.category_name = 'Environmental'
+UNION ALL
+SELECT p.project_id, c.category_id FROM projects p, categories c WHERE p.title = 'Composting Workshop' AND c.category_name = 'Educational'
+ON CONFLICT DO NOTHING;
