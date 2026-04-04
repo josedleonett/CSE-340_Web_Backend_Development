@@ -112,3 +112,17 @@ export async function getProjectDetails(id) {
     throw error;
   }
 }
+
+export async function updateProject(id, title, description, date, location, organizationId) {
+  const result = await pool.query(
+    `UPDATE projects
+     SET title = $1, description = $2, date = $3, location = $4, organization_id = $5
+     WHERE project_id = $6
+     RETURNING *`,
+    [title, description, date, location, organizationId, id]
+  );
+  if (result.rowCount === 0) {
+    throw new Error('No project found with that ID');
+  }
+  return result.rows[0];
+}

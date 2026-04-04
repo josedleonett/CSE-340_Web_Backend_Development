@@ -1,0 +1,49 @@
+<%- include('partials/header') %>
+
+    <section class="page-header">
+      <h2><%= title %></h2>
+    </section>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <section class="error-message">
+        <p><%= error %></p>
+      </section>
+    <% } %>
+
+    <% if (project) { %>
+      <form action="/edit-project/<%= project.project_id %>" method="POST">
+        <div>
+          <label for="title">Project Title:</label>
+          <input type="text" id="title" name="title" value="<%= project.title %>" required maxlength="150">
+        </div>
+        <div>
+          <label for="description">Description:</label>
+          <textarea id="description" name="description" required maxlength="500"><%= project.description %></textarea>
+        </div>
+        <div>
+          <label for="date">Date:</label>
+          <input type="date" id="date" name="date"
+            value="<%= new Date(project.date).toISOString().split('T')[0] %>" required>
+        </div>
+        <div>
+          <label for="location">Location:</label>
+          <input type="text" id="location" name="location" value="<%= project.location %>" required>
+        </div>
+        <div>
+          <label for="organization_id">Organization:</label>
+          <select id="organization_id" name="organization_id" required>
+            <% organizations.forEach(org => { %>
+              <option value="<%= org.organization_id %>"
+                <%= org.organization_id === project.organization_id ? 'selected' : '' %>>
+                <%= org.organization_name %>
+              </option>
+            <% }); %>
+          </select>
+        </div>
+        <button type="submit">Update Project</button>
+      </form>
+    <% } else { %>
+      <p>Project not found.</p>
+    <% } %>
+
+<%- include('partials/footer') %>

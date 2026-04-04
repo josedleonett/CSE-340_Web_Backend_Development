@@ -1,0 +1,321 @@
+W03 Coaching Session: Model-View-Controller
+============================================
+Date: April 2, 2026
+Student: Jose Leonett
+Course: CSE 340 - Web Backend Development
+
+============================================
+TRANSCRIPT
+============================================
+
+AI Coach:
+Welcome! Just to be clear from the start, this is a coaching session, not a test.
+It is perfectly okay — and even encouraged — to say "I don't know" or "I made a
+mistake." That's the fastest way we'll learn today.
+
+My name is your Learning Coach and Software Mentor. Before we dive in, could you
+tell me your name so I can personalize our session?
+
+Student:
+My name is Jose.
+
+AI Coach:
+Great to meet you, Jose! Remember, this is a safe space — there are no wrong
+answers here, only learning opportunities. Let's get started.
+
+Last week we talked about how your application retrieves data from the database.
+This week you refactored the project to use the Model-View-Controller pattern.
+In your own words, what is MVC and why is it useful?
+
+Student:
+MVC is a way to organize the code by separating it into three layers with different
+responsibilities. The Model handles all data access and database logic. The View is
+the HTML template that the user sees. The Controller sits in the middle — it receives
+the request, asks the model for data, and then passes that data to the view.
+
+It is useful because each layer only does one job. If I need to change how data is
+fetched from the database, I only touch the model. If I change how something looks,
+I only touch the view. The controller stays the same. This makes the code easier
+to maintain and to test.
+
+AI Coach:
+That is a clear description of separation of concerns, Jose. Let's look at each layer
+in detail. Let's start with the models, since you now have a dedicated folder for them.
+
+---
+TOPIC 1: Models
+---
+
+AI Coach:
+Can you show me a model function from your project that accepts a parameter and
+uses it inside an SQL query?
+
+Student:
+Yes! Here is the getProjectById function from src/models/projects.js:
+
+    export async function getProjectById(projectId) {
+      try {
+        const result = await pool.query(`
+          SELECT
+            p.project_id,
+            p.title,
+            p.description,
+            p.location,
+            p.date,
+            p.organization_id,
+            o.organization_name
+          FROM projects p
+          JOIN organizations o ON p.organization_id = o.organization_id
+          WHERE p.project_id = $1
+        `, [projectId]);
+        return result.rows[0] || null;
+      } catch (error) {
+        console.error('Error getting project by id:', error);
+        throw error;
+      }
+    }
+
+This function receives a projectId as a parameter and uses it in the WHERE clause
+to filter to a single project. It also does a JOIN so the organization name is
+included without needing a second query.
+
+AI Coach:
+Good example. I noticed you are using $1 as a placeholder and passing [projectId]
+as a separate array to pool.query. Why not just put the variable directly inside
+the SQL string using a template literal?
+
+Student:
+If I wrote the SQL as a template literal like
+WHERE p.project_id = ${projectId},
+the value would be inserted directly into the SQL string. That makes the app
+vulnerable to SQL injection. For example, someone could put a malicious string in
+the URL and it could delete or expose data in the database.
+
+By using $1 and passing the value in an array, the pg library sends the value and
+the query separately to PostgreSQL. The database treats the value as data only,
+never as SQL code. It is the correct and safe way to include dynamic values in an
+SQL query.
+
+AI Coach:
+Exactly right, Jose. Parameterized queries are one of the most important security
+practices in backend development. Now let's talk about the views.
+
+---
+TOPIC 2: Views
+---
+
+AI Coach:
+Can you share an EJS snippet from one of your views that inserts dynamic data
+into a link?
+
+Student:
+Sure! Here is a section from views/projects.ejs that loops through the projects
+list and builds a link for each one:
+
+    <% projects.forEach(project => { %>
+      <div class="project-card">
+        <h3>
+          <a href="/project/<%= project.project_id %>"><%= project.title %></a>
+        </h3>
+        <span class="project-organization">
+          <a href="/organization/<%= project.organization_id %>">
+            <%= project.organization_name %>
+          </a>
+        </span>
+        <p><%= project.description %></p>
+        <p><strong>Date:</strong>
+          <%= new Date(project.date).toLocaleDateString('en-US',
+              { year: 'numeric', month: 'long', day: 'numeric' }) %>
+        </p>
+      </div>
+    <% }); %>
+
+Each project card has two links. The first is the project title, which points to
+/project/ followed by the project_id. The second is the organization name, which
+points to /organization/ followed by the organization_id.
+
+AI Coach:
+I can see you are mixing <% %> and <%= %> tags in the snippet. Can you explain
+the difference between the two and why you use each one in this context?
+
+Student:
+<% %> runs JavaScript code but does not print anything to the HTML output. I use
+it for the forEach loop and its closing brace because those are control flow
+statements, not values to display.
+
+<%= %> runs JavaScript and also outputs the result into the HTML. I use it when
+I want to insert a value — like project.project_id inside the href attribute, or
+project.title as the visible link text.
+
+So the loop is wrapped in <% %> because I just want to repeat a block of HTML,
+but the actual data values are wrapped in <%= %> because I want them printed on
+the page.
+
+AI Coach:
+That is a clear and correct distinction. I also notice you are using project.project_id
+inside the href attribute, creating URLs like /project/3. What happens on the
+server when a user clicks that link?
+
+Student:
+The browser sends a GET request to /project/3. Express matches that request to the
+route router.get('/project/:id', showProjectDetailsPage). The :id part of the route
+pattern captures the value 3 and makes it available in the controller as
+req.params.id. The controller then passes that id to the model to fetch the right
+record from the database.
+
+AI Coach:
+That is a great connection between the view and the controller. Let's look at that
+controller in detail now.
+
+---
+TOPIC 3: Controllers
+---
+
+AI Coach:
+Can you share a controller function that uses a route parameter?
+
+Student:
+Yes! Here is the showProjectDetailsPage function from src/controllers/projects.js,
+and the route that maps to it from src/controllers/routes.js:
+
+    // Route definition in routes.js
+    router.get('/project/:id', showProjectDetailsPage);
+
+    // Controller function in controllers/projects.js
+    const showProjectDetailsPage = async (req, res) => {
+      try {
+        const projectId = req.params.id;
+        const project = await getProjectDetails(projectId);
+        const categories = await getCategoriesByProject(projectId);
+        const title = 'Service Project Details';
+        res.render('project', { title, project, categories });
+      } catch (error) {
+        console.error('Error retrieving project details:', error);
+        res.status(500).render('project', {
+          title: 'Service Project Details',
+          project: null,
+          categories: [],
+          error: 'Error retrieving project details from database'
+        });
+      }
+    };
+
+req.params.id reads the dynamic segment from the URL. I then use that projectId
+to call two model functions: one to get the project data and one to get its
+associated categories. Both results are passed to the view through res.render().
+
+AI Coach:
+I see you are calling two separate model functions — getProjectDetails and
+getCategoriesByProject — with the same projectId. Why two separate calls instead
+of combining everything in one SQL query?
+
+Student:
+I could have done a single SQL query with multiple JOINs, but keeping the model
+functions separate has advantages. Each function does one specific job and can
+be reused in other parts of the app independently. For example, getCategoriesByProject
+might be useful somewhere else where I do not need the full project detail.
+
+It also keeps the model code easier to read and test. The controller combines
+the results before passing them to the view. That is the controller's job — to
+coordinate between different data sources and build the data object that the
+view needs.
+
+AI Coach:
+That is good reasoning about reusability and single responsibility. Let's close
+the session with the fourth topic.
+
+---
+TOPIC 4: Error Handling
+---
+
+AI Coach:
+Can you walk me through your strategy for handling errors, including your use of
+a 404 or 500 status page? Please share a relevant code snippet.
+
+Student:
+My error handling has two layers. The first layer is inside each controller. Every
+controller function has a try/catch block. If the model throws an error — for example
+if the database is down — the catch block sends back a 500 status and renders the
+page with an error message variable, so the user still sees a page instead of a
+raw crash.
+
+The second layer is at the application level in server.js. I have two middleware
+functions registered after all the routes:
+
+    // 404 handler — catches requests that did not match any route
+    app.use((req, res, next) => {
+      const err = new Error('Page Not Found');
+      err.status = 404;
+      next(err);
+    });
+
+    // Global error handler — processes all errors forwarded via next(err)
+    app.use((err, req, res, next) => {
+      console.error('Error occurred:', err.message);
+      const status = err.status || 500;
+      res.status(status).render('index', { title: 'Error', error: err.message });
+    });
+
+The 404 middleware runs when no route matched. It creates an error object with
+status 404 and passes it to next(). The global error handler then handles it the
+same way it handles any other error — it reads err.status to set the HTTP status
+code and renders the page with the error message.
+
+AI Coach:
+Why do you call next(err) in the 404 middleware instead of rendering a response
+directly?
+
+Student:
+By calling next(err) I delegate the response to the global error handler, which
+already knows how to render an error page. If I rendered directly in the 404
+middleware, I would have to duplicate the rendering logic. With next(err) I keep
+the rendering logic in one place, and both 404 and 500 errors go through the same
+handler. This follows the DRY principle.
+
+AI Coach:
+Exactly right. One final question: I also see a /test-error route in routes.js.
+What is that for?
+
+Student:
+That route calls the testErrorPage function in src/controllers/errors.js. It
+intentionally creates a 500 error and passes it to next() so I can test that the
+global error handler is working correctly. Here is the function:
+
+    const testErrorPage = (req, res, next) => {
+      const err = new Error('This is a test error');
+      err.status = 500;
+      next(err);
+    };
+
+It is a development tool so I can verify the error page looks right without having
+to break something real in the application.
+
+AI Coach:
+That is a smart development practice, Jose. Having a safe way to trigger error
+handling without breaking production code is a good habit.
+
+You have successfully covered all four required topics for this coaching session.
+
+1. Models — COMPLETE
+   You explained how getProjectById accepts a parameter and uses $1 to safely
+   include it in an SQL WHERE clause, preventing SQL injection attacks.
+
+2. Views — COMPLETE
+   You showed the projects.ejs snippet with links that insert project.project_id
+   and organization_id dynamically into href attributes, and explained the
+   difference between <% %> and <%= %>.
+
+3. Controllers — COMPLETE
+   You walked through showProjectDetailsPage, explained how req.params.id reads
+   the route parameter from /project/:id, and how res.render() passes model data
+   to the view.
+
+4. Error Handling — COMPLETE
+   You described the two-layer strategy: controller-level try/catch blocks plus
+   global 404 and 500 middleware in server.js chained with next(err).
+
+Great work today, Jose! This coaching session is complete.
+
+============================================
+END OF SESSION
+============================================
