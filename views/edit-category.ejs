@@ -1,0 +1,30 @@
+<%- include('partials/header') %>
+
+    <section class="page-header">
+      <h2><%= title %></h2>
+    </section>
+
+    <% const messages = flash(); %>
+    <% Object.keys(messages).forEach(type => { %>
+      <% if (messages[type].length > 0) { %>
+        <% messages[type].forEach(msg => { %>
+          <div class="alert <%= type %>"><%= msg %></div>
+        <% }); %>
+      <% } %>
+    <% }); %>
+
+    <% if (category) { %>
+      <div class="form-card">
+        <form action="/edit-category/<%= category.category_id %>" method="POST">
+          <div class="form-group">
+            <label for="category_name">Category Name</label>
+            <input type="text" id="category_name" name="category_name" value="<%= category.category_name %>" required minlength="3" maxlength="100">
+          </div>
+          <button type="submit">Update Category</button>
+        </form>
+      </div>
+    <% } else { %>
+      <p>Category not found.</p>
+    <% } %>
+
+<%- include('partials/footer') %>

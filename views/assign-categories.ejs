@@ -1,0 +1,47 @@
+<%- include('partials/header') %>
+
+    <section class="page-header">
+      <h2><%= title %></h2>
+    </section>
+
+    <% const messages = flash(); %>
+    <% Object.keys(messages).forEach(type => { %>
+      <% if (messages[type].length > 0) { %>
+        <% messages[type].forEach(msg => { %>
+          <div class="alert <%= type %>"><%= msg %></div>
+        <% }); %>
+      <% } %>
+    <% }); %>
+
+    <% if (project) { %>
+      <div class="form-card">
+        <p style="margin-bottom:1.25rem;color:var(--text-light);">Assigning categories for: <strong style="color:var(--text-color);"><%= project.title %></strong></p>
+
+        <form action="/project/<%= project.project_id %>/assign-categories" method="POST">
+          <fieldset>
+            <legend>Select Categories</legend>
+            <% if (allCategories && allCategories.length > 0) { %>
+              <% allCategories.forEach(cat => { %>
+                <div class="form-check">
+                  <input
+                    type="checkbox"
+                    id="cat_<%= cat.category_id %>"
+                    name="categories"
+                    value="<%= cat.category_id %>"
+                    <%= assignedIds.includes(cat.category_id) ? 'checked' : '' %>
+                  >
+                  <label for="cat_<%= cat.category_id %>"><%= cat.category_name %></label>
+                </div>
+              <% }); %>
+            <% } else { %>
+              <p>No categories available. <a href="/new-category">Add a category</a> first.</p>
+            <% } %>
+          </fieldset>
+          <button type="submit">Save Categories</button>
+        </form>
+      </div>
+    <% } else { %>
+      <p>Project not found.</p>
+    <% } %>
+
+<%- include('partials/footer') %>

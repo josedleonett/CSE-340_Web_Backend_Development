@@ -113,6 +113,21 @@ export async function getProjectDetails(id) {
   }
 }
 
+export async function createProject(title, description, location, date, organizationId) {
+  try {
+    const result = await pool.query(
+      `INSERT INTO projects (title, description, location, date, organization_id)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING project_id`,
+      [title, description, location, date, organizationId]
+    );
+    return result.rows[0].project_id;
+  } catch (error) {
+    console.error('Error creating project:', error);
+    throw error;
+  }
+}
+
 export async function updateProject(id, title, description, date, location, organizationId) {
   const result = await pool.query(
     `UPDATE projects

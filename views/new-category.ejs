@@ -1,0 +1,26 @@
+<%- include('partials/header') %>
+
+    <section class="page-header">
+      <h2><%= title %></h2>
+    </section>
+
+    <% const messages = flash(); %>
+    <% Object.keys(messages).forEach(type => { %>
+      <% if (messages[type].length > 0) { %>
+        <% messages[type].forEach(msg => { %>
+          <div class="alert <%= type %>"><%= msg %></div>
+        <% }); %>
+      <% } %>
+    <% }); %>
+
+    <div class="form-card">
+      <form action="/new-category" method="POST">
+        <div class="form-group">
+          <label for="category_name">Category Name</label>
+          <input type="text" id="category_name" name="category_name" required minlength="3" maxlength="100">
+        </div>
+        <button type="submit">Create Category</button>
+      </form>
+    </div>
+
+<%- include('partials/footer') %>

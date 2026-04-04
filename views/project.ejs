@@ -4,6 +4,15 @@
       <h2><%= title %></h2>
     </section>
 
+    <% const messages = flash(); %>
+    <% Object.keys(messages).forEach(type => { %>
+      <% if (messages[type].length > 0) { %>
+        <% messages[type].forEach(msg => { %>
+          <div class="alert <%= type %>"><%= msg %></div>
+        <% }); %>
+      <% } %>
+    <% }); %>
+
     <% if (typeof error !== 'undefined' && error) { %>
       <section class="error-message">
         <p><%= error %></p>
@@ -25,7 +34,10 @@
           </p>
         <% } %>
       </section>
-      <a href="/edit-project/<%= project.project_id %>">Edit Project</a>
+      <div class="page-actions">
+        <a href="/edit-project/<%= project.project_id %>" class="btn btn-outline">Edit Project</a>
+        <a href="/project/<%= project.project_id %>/assign-categories" class="btn btn-outline">Assign Categories</a>
+      </div>
     <% } else { %>
       <p>Project not found.</p>
     <% } %>

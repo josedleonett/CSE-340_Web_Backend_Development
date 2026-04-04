@@ -21,3 +21,11 @@
     </div>
   </header>
   <main>
+    <% const flashMessages = flash(); %>
+    <% Object.keys(flashMessages).forEach(type => { %>
+      <% if (flashMessages[type].length > 0) { %>
+        <% flashMessages[type].forEach(msg => { %>
+          <div class="alert <%= type %>"><%= msg %></div>
+        <% }); %>
+      <% } %>
+    <% }); %>

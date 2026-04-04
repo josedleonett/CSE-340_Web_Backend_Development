@@ -5,6 +5,19 @@
       <p>Current and upcoming service projects in our community.</p>
     </section>
 
+    <div class="page-actions">
+      <a href="/new-project" class="btn">+ Add Project</a>
+    </div>
+
+    <% const messages = flash(); %>
+    <% Object.keys(messages).forEach(type => { %>
+      <% if (messages[type].length > 0) { %>
+        <% messages[type].forEach(msg => { %>
+          <div class="alert <%= type %>"><%= msg %></div>
+        <% }); %>
+      <% } %>
+    <% }); %>
+
     <% if (typeof error !== 'undefined' && error) { %>
       <section class="error-message">
         <p><%= error %></p>

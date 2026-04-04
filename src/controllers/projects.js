@@ -1,6 +1,28 @@
-import { getUpcomingProjects, getProjectDetails, updateProject } from '../models/projects.js';
+import { body, validationResult } from 'express-validator';
+import { getUpcomingProjects, getProjectDetails, createProject, updateProject } from '../models/projects.js';
 import { getAllOrganizations } from '../models/organizations.js';
 import { getCategoriesByProject } from '../models/categories.js';
+
+const projectValidation = [
+  body('title')
+    .trim()
+    .notEmpty().withMessage('Title is required')
+    .isLength({ min: 3, max: 200 }).withMessage('Title must be between 3 and 200 characters'),
+  body('description')
+    .trim()
+    .notEmpty().withMessage('Description is required')
+    .isLength({ max: 1000 }).withMessage('Description cannot exceed 1000 characters'),
+  body('location')
+    .trim()
+    .notEmpty().withMessage('Location is required')
+    .isLength({ max: 200 }).withMessage('Location cannot exceed 200 characters'),
+  body('date')
+    .notEmpty().withMessage('Date is required')
+    .isISO8601().withMessage('Please provide a valid date'),
+  body('organization_id')
+    .notEmpty().withMessage('Organization is required')
+    .isInt().withMessage('Please select a valid organization'),
+];
 
 const NUMBER_OF_UPCOMING_PROJECTS = 5;
 
@@ -55,11 +77,40 @@ const showEditProjectForm = async (req, res) => {
   }
 };
 
-const processEditProjectForm = async (req, res) => {
+const showNewProjectForm = async (req, res) => {
   try {
-    const projectId = req.params.id;
+    const organizations = await getAllOrganizations();
+    const title = 'Add New Project';
+    res.render('new-project', { title, organizations });
+  } catch (error) {
+    console.error('Error loading new project form:', error);
+    res.status(500).send('Error loading form');
+  }
+};
+
+const processNewProjectForm = async (req, res) => {
+  const results = validationResult(req);
+  if (!results.isEmpty()) {
+    results.array().forEach(error => req.flash('error', error.msg));
+    return res.redirect('/new-project');
+  }
+  const { title, description, location, date, organization_id } = req.body;
+  const projectId = await createProject(title, description, location, date, organization_id);
+  req.flash('success', 'Project created successfully!');
+  res.redirect(`/project/${projectId}`);
+};
+
+const processEditProjectForm = async (req, res) => {
+  const results = validationResult(req);
+  const projectId = req.params.id;
+  if (!results.isEmpty()) {
+    results.array().forEach(error => req.flash('error', error.msg));
+    return res.redirect(`/edit-project/${projectId}`);
+  }
+  try {
     const { title, description, date, location, organization_id } = req.body;
     await updateProject(projectId, title, description, date, location, organization_id);
+    req.flash('success', 'Project updated successfully!');
     res.redirect(`/project/${projectId}`);
   } catch (error) {
     console.error('Error updating project:', error);
@@ -67,4 +118,4 @@ const processEditProjectForm = async (req, res) => {
   }
 };
 
-export { showProjectsPage, showProjectDetailsPage, showEditProjectForm, processEditProjectForm };
+export { projectValidation, showProjectsPage, showProjectDetailsPage, showNewProjectForm, processNewProjectForm, showEditProjectForm, processEditProjectForm };

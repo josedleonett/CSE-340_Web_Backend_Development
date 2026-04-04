@@ -2,6 +2,8 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import session from 'express-session';
+import flash from './src/middleware/flash.js';
 import router from './src/controllers/routes.js';
 
 dotenv.config({ override: true });
@@ -14,6 +16,18 @@ const PORT = process.env.PORT || 3000;
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'cse340-secret-key',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { maxAge: 60 * 60 * 1000 }
+}));
+
+app.use(flash);
 
 app.use(express.static(path.join(__dirname, 'public')));
 

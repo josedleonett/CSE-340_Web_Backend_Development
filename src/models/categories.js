@@ -64,3 +64,47 @@ export async function getCategoriesByProject(projectId) {
     throw error;
   }
 }
+
+export async function createCategory(categoryName) {
+  try {
+    const result = await pool.query(
+      `INSERT INTO categories (category_name) VALUES ($1) RETURNING category_id`,
+      [categoryName]
+    );
+    return result.rows[0].category_id;
+  } catch (error) {
+    console.error('Error creating category:', error);
+    throw error;
+  }
+}
+
+export async function updateCategory(id, categoryName) {
+  try {
+    const result = await pool.query(
+      `UPDATE categories SET category_name = $1 WHERE category_id = $2 RETURNING *`,
+      [categoryName, id]
+    );
+    if (result.rowCount === 0) throw new Error('No category found with that ID');
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error updating category:', error);
+    throw error;
+  }
+}
+
+export async function updateCategoryAssignments(projectId, categoryIds) {
+  try {
+    await pool.query(`DELETE FROM project_categories WHERE project_id = $1`, [projectId]);
+    if (categoryIds && categoryIds.length > 0) {
+      for (const categoryId of categoryIds) {
+        await pool.query(
+          `INSERT INTO project_categories (project_id, category_id) VALUES ($1, $2)`,
+          [projectId, categoryId]
+        );
+      }
+    }
+  } catch (error) {
+    console.error('Error updating category assignments:', error);
+    throw error;
+  }
+}

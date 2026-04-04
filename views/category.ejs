@@ -4,6 +4,15 @@
       <h2><%= title %></h2>
     </section>
 
+    <% const messages = flash(); %>
+    <% Object.keys(messages).forEach(type => { %>
+      <% if (messages[type].length > 0) { %>
+        <% messages[type].forEach(msg => { %>
+          <div class="alert <%= type %>"><%= msg %></div>
+        <% }); %>
+      <% } %>
+    <% }); %>
+
     <% if (typeof error !== 'undefined' && error) { %>
       <section class="error-message">
         <p><%= error %></p>
@@ -30,6 +39,9 @@
           <p>No service projects available for this category.</p>
         <% } %>
       </section>
+      <div class="page-actions">
+        <a href="/edit-category/<%= category.category_id %>" class="btn btn-outline">Edit Category</a>
+      </div>
     <% } else { %>
       <p>Category not found.</p>
     <% } %>
