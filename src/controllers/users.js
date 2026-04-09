@@ -41,9 +41,10 @@ export const processLoginForm = async (req, res) => {
 };
 
 export const processLogout = (req, res) => {
-  req.session.destroy();
-  req.flash('success', 'You have been logged out.');
-  res.redirect('/login');
+  req.session.destroy((err) => {
+    if (err) console.error(err);
+    res.redirect('/login');
+  });
 };
 
 export const requireLogin = (req, res, next) => {
