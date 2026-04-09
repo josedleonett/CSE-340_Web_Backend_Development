@@ -5,9 +5,11 @@
       <p>Community organizations participating in service projects.</p>
     </section>
 
+    <% if (user && user.role_name === 'admin') { %>
     <div class="page-actions">
       <a href="/new-organization" class="btn">+ Add Organization</a>
     </div>
+    <% } %>
 
     <section class="organizations-grid">
       <% organizations.forEach(org => { %>

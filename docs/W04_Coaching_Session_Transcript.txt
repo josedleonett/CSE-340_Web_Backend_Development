@@ -1,0 +1,378 @@
+W04 Coaching Session: Inserting and Updating Data
+==================================================
+Date: April 4, 2026
+Student: Jose Leonett
+Course: CSE 340 - Web Backend Development
+
+==================================================
+TRANSCRIPT
+==================================================
+
+AI Coach:
+Welcome! Just to be clear from the start, this is a coaching session, not a test.
+It is perfectly okay — and even encouraged — to say "I don't know" or "I made a
+mistake." That's the fastest way we'll learn today.
+
+My name is your Learning Coach and Software Mentor. Before we dive in, could you
+tell me your name so I can personalize our session?
+
+Student:
+My name is Jose.
+
+AI Coach:
+Great to meet you, Jose! Remember, this is a safe space — there are no wrong
+answers here, only learning opportunities. Let's get started.
+
+This week you added the ability to insert and update data in your application. That
+means users can now submit forms to create and edit organizations, projects, and
+categories. Can you give me a quick overview of what changed in the app compared
+to last week?
+
+Student:
+Last week the app was read-only — it could only display data. This week I added
+forms so users can create new records and edit existing ones. I set up POST routes
+for each entity, added server-side validation using express-validator, and added
+sessions and flash messages so the app can give feedback to the user after a form
+is submitted.
+
+AI Coach:
+That is a solid overview. Let's go topic by topic. Let's start with how your
+application handles form submissions.
+
+---
+TOPIC 1: Handling Form Submissions
+---
+
+AI Coach:
+Can you walk me through what happens on the server when a user submits a form to
+create a new organization? Please share a relevant code snippet.
+
+Student:
+When the user fills out the new-organization form and clicks submit, the browser
+sends a POST request to /new-organization. Express matches that to the route:
+
+    router.post('/new-organization', organizationValidation, processNewOrganizationForm);
+
+The route has three parts: the path, the validation middleware array, and the
+controller function. First the validation runs. If it passes, processNewOrganizationForm
+is called. Here is that function from src/controllers/organizations.js:
+
+    const processNewOrganizationForm = async (req, res) => {
+      const results = validationResult(req);
+      if (!results.isEmpty()) {
+        results.array().forEach(error => req.flash('error', error.msg));
+        return res.redirect('/new-organization');
+      }
+      const { organization_name, mission, contact_email, phone } = req.body;
+      const organizationId = await createOrganization(organization_name, mission, contact_email, phone);
+      req.flash('success', 'Organization created successfully!');
+      res.redirect(`/organization/${organizationId}`);
+    };
+
+First I check validationResult(req). If there are errors, I flash each error
+message and redirect the user back to the form. If validation passed, I
+destructure the fields from req.body and pass them to the createOrganization model
+function. After the record is saved, I flash a success message and redirect the
+user to the new organization's detail page.
+
+AI Coach:
+Good explanation. You mentioned req.body — where does that data come from, and
+why does it work without any extra library?
+
+Student:
+req.body contains the data that the browser sent in the body of the POST request.
+HTML forms submit data as URL-encoded key-value pairs by default. In server.js I
+have this line:
+
+    app.use(express.urlencoded({ extended: true }));
+
+That middleware parses the request body and makes it available as req.body. The
+keys in req.body match the name attributes of the form inputs. For example,
+the input with name="organization_name" becomes req.body.organization_name.
+Without that middleware req.body would be undefined.
+
+AI Coach:
+Exactly right. And what does the createOrganization model function do with those
+values? Can you show the INSERT query?
+
+Student:
+Here is the createOrganization function from src/models/organizations.js:
+
+    export async function createOrganization(organizationName, mission, contactEmail, phone) {
+      const result = await pool.query(
+        `INSERT INTO organizations (organization_name, mission, contact_email, phone)
+         VALUES ($1, $2, $3, $4)
+         RETURNING organization_id`,
+        [organizationName, mission, contactEmail, phone]
+      );
+      if (result.rows.length === 0) throw new Error('Failed to create organization');
+      return result.rows[0].organization_id;
+    }
+
+It runs an INSERT statement using parameterized placeholders $1 through $4 to
+prevent SQL injection. The RETURNING clause tells PostgreSQL to return the new
+row's organization_id immediately, so the controller can redirect the user to the
+correct detail page without needing a second query.
+
+AI Coach:
+Great. The RETURNING clause is a useful PostgreSQL feature. Let's now talk about
+how forms work when editing an existing record.
+
+---
+TOPIC 2: Forms for Updates
+---
+
+AI Coach:
+Can you show me an EJS snippet from one of your edit forms that pre-fills the
+fields with the current data from the database?
+
+Student:
+Yes! Here is a section from views/edit-organization.ejs:
+
+    <form action="/edit-organization/<%= organizationDetails.organization_id %>" method="POST">
+      <div class="form-group">
+        <label for="organization_name">Organization Name</label>
+        <input type="text" id="organization_name" name="organization_name"
+          value="<%= organizationDetails.organization_name %>" required maxlength="255">
+      </div>
+      <div class="form-group">
+        <label for="mission">Mission</label>
+        <textarea id="mission" name="mission" required maxlength="1000">
+          <%= organizationDetails.mission %>
+        </textarea>
+      </div>
+      <div class="form-group">
+        <label for="contact_email">Contact Email</label>
+        <input type="email" id="contact_email" name="contact_email"
+          value="<%= organizationDetails.contact_email %>" required>
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone</label>
+        <input type="text" id="phone" name="phone"
+          value="<%= organizationDetails.phone %>" required maxlength="20">
+      </div>
+      <button type="submit">Update Organization</button>
+    </form>
+
+Each input uses the value attribute with <%= organizationDetails.field_name %> to
+pre-fill the form. For the textarea I put the EJS expression between the opening
+and closing tags instead of using value, because textareas do not have a value
+attribute the same way inputs do. The form action also includes the organization
+ID in the URL so the POST goes to the correct /edit-organization/:id route.
+
+AI Coach:
+Good observation about textarea versus input. How does the controller get the
+current data to pass to this view before the form is displayed?
+
+Student:
+The showEditOrganizationForm controller handles the GET request. Here it is from
+src/controllers/organizations.js:
+
+    const showEditOrganizationForm = async (req, res) => {
+      try {
+        const organizationId = req.params.id;
+        const organizationDetails = await getOrganizationDetails(organizationId);
+        const title = 'Edit Organization';
+        res.render('edit-organization', { title, organizationDetails });
+      } catch (error) {
+        console.error('Error retrieving organization for edit:', error);
+        res.status(500).send('Error retrieving organization data');
+      }
+    };
+
+It reads the id from req.params, calls the model to get the current record, then
+passes it to res.render so the EJS view can use it to pre-fill the form fields.
+
+AI Coach:
+That is the correct approach. Now let's talk about how the application communicates
+results back to the user after a form is submitted.
+
+---
+TOPIC 3: Sessions and Flash Messages
+---
+
+AI Coach:
+Can you explain the purpose of sessions in your application, and how flash messages
+work? Please share a relevant snippet.
+
+Student:
+Sessions let the server remember information about a user between requests. Each
+request is independent in HTTP, so without sessions the server has no memory of
+what happened in a previous request.
+
+I use sessions specifically to pass flash messages — temporary messages that
+survive one redirect and then disappear. This is important because when a form
+is submitted, best practice is to redirect the user instead of rendering directly.
+So I save the message in the session before the redirect, and then the next page
+reads and displays it.
+
+In server.js I set up the session middleware:
+
+    app.use(session({
+      secret: process.env.SESSION_SECRET || 'cse340-secret-key',
+      resave: false,
+      saveUninitialized: true,
+      cookie: { maxAge: 60 * 60 * 1000 }
+    }));
+
+    app.use(flash);
+
+And here is the custom flash middleware from src/middleware/flash.js:
+
+    const flashMiddleware = (req, res, next) => {
+      req.flash = function(type, message) {
+        if (!req.session.flash) {
+          req.session.flash = { success: [], error: [], warning: [], info: [] };
+        }
+        if (type && message) {
+          if (!req.session.flash[type]) req.session.flash[type] = [];
+          req.session.flash[type].push(message);
+          return;
+        }
+        if (type && !message) {
+          const messages = req.session.flash[type] || [];
+          req.session.flash[type] = [];
+          return messages;
+        }
+        const allMessages = req.session.flash || { success: [], error: [], warning: [], info: [] };
+        req.session.flash = { success: [], error: [], warning: [], info: [] };
+        return allMessages;
+      };
+      next();
+    };
+
+When called with two arguments like req.flash('success', 'Organization created!')
+it stores the message in the session. When called with no arguments it returns all
+messages and clears them so they only display once.
+
+AI Coach:
+Good explanation of the store-and-clear behavior. How do the views actually display
+those flash messages?
+
+Student:
+Every form view calls flash() at the top and loops through the results. Here is
+the pattern used in views/new-organization.ejs:
+
+    <% const messages = flash(); %>
+    <% Object.keys(messages).forEach(type => { %>
+      <% if (messages[type].length > 0) { %>
+        <% messages[type].forEach(msg => { %>
+          <div class="alert <%= type %>"><%= msg %></div>
+        <% }); %>
+      <% } %>
+    <% }); %>
+
+The flash() function is made available to all views through res.locals in the
+flashLocals middleware, which runs on every request. Each message type — success,
+error, warning, info — gets its own CSS class on the alert div so they can be
+styled differently. After this block renders, the messages are cleared from the
+session.
+
+AI Coach:
+That is a clean pattern. Let's finish with your approach to server-side validation.
+
+---
+TOPIC 4: Validation
+---
+
+AI Coach:
+Can you explain your approach to validating user input on the server side and share
+a code snippet?
+
+Student:
+I use the express-validator library to validate form input. I define validation
+rules as an array of middleware and include that array in the route definition
+between the path and the controller function. Here is the organizationValidation
+array from src/controllers/organizations.js:
+
+    const organizationValidation = [
+      body('organization_name')
+        .trim()
+        .notEmpty().withMessage('Organization name is required')
+        .isLength({ min: 3, max: 255 }).withMessage('Organization name must be between 3 and 255 characters'),
+      body('mission')
+        .trim()
+        .notEmpty().withMessage('Mission is required')
+        .isLength({ max: 1000 }).withMessage('Mission cannot exceed 1000 characters'),
+      body('contact_email')
+        .normalizeEmail()
+        .notEmpty().withMessage('Contact email is required')
+        .isEmail().withMessage('Please provide a valid email address'),
+      body('phone')
+        .trim()
+        .notEmpty().withMessage('Phone is required')
+        .isLength({ max: 20 }).withMessage('Phone cannot exceed 20 characters'),
+    ];
+
+Each body() call targets a specific form field. I chain sanitizers like trim()
+and normalizeEmail() to clean the data, and then validators like notEmpty() and
+isEmail() to check it. The withMessage() call sets a human-readable error message
+for each rule.
+
+AI Coach:
+Why is server-side validation important even if you already have HTML validation
+attributes like required and maxlength on the form fields?
+
+Student:
+HTML validation only runs in the browser. Anyone can bypass it by disabling
+JavaScript, using a tool like Postman, or crafting a raw HTTP request. If I relied
+only on the HTML attributes, a user could submit empty fields or an invalid email
+directly to the POST route and that bad data would go straight into the database.
+
+Server-side validation runs on code that the user cannot change or bypass. It is
+the real security boundary. The HTML attributes are only a convenience for regular
+users so they get fast feedback without a round trip to the server.
+
+AI Coach:
+Exactly right — the user controls the browser, not the server. One last question:
+what happens in the controller when validation fails?
+
+Student:
+The controller calls validationResult(req) to get the list of errors. Here is the
+relevant code from processNewOrganizationForm:
+
+    const results = validationResult(req);
+    if (!results.isEmpty()) {
+      results.array().forEach(error => req.flash('error', error.msg));
+      return res.redirect('/new-organization');
+    }
+
+If there are errors, I loop through them and call req.flash('error', error.msg)
+for each one. Then I redirect back to the form. On the next page load the flash
+middleware makes those messages available, the view displays them as red alert
+divs, and then they are cleared from the session. The user sees exactly what
+they need to fix without losing the page.
+
+AI Coach:
+Well handled, Jose. You covered all the moving parts — validation rules, collecting
+errors, flashing messages, and redirecting. That is the complete form-handling
+cycle in this application.
+
+You have successfully covered all four required topics for this coaching session.
+
+1. Handling Form Submissions — COMPLETE
+   You explained how POST routes are defined, how express.urlencoded() makes
+   req.body available, and how model functions use parameterized INSERT queries
+   with RETURNING to create records and return the new ID.
+
+2. Forms for Updates — COMPLETE
+   You showed the edit-organization.ejs snippet with value="<%= %>" attributes
+   pre-filling each input, and explained how the GET controller fetches the
+   current record from the model and passes it to the view before the form loads.
+
+3. Sessions and Flash Messages — COMPLETE
+   You explained that sessions give HTTP memory between requests, and that flash
+   messages are stored in the session before a redirect and cleared after they
+   are displayed. You showed the custom flash middleware and the view loop that
+   renders messages by type.
+
+4. Validation — COMPLETE
+   You explained how express-validator rules are defined as a middleware array,
+   chained on the route, and checked with validationResult(req). You also explained
+   why server-side validation is essential even when HTML attributes exist.
+
+Great work today, Jose! This coaching session is complete.
+
+==================================================
+END OF SESSION
+==================================================

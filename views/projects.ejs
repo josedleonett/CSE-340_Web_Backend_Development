@@ -5,9 +5,11 @@
       <p>Current and upcoming service projects in our community.</p>
     </section>
 
+    <% if (user && user.role_name === 'admin') { %>
     <div class="page-actions">
       <a href="/new-project" class="btn">+ Add Project</a>
     </div>
+    <% } %>
 
     <% const messages = flash(); %>
     <% Object.keys(messages).forEach(type => { %>

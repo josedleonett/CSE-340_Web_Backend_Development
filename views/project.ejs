@@ -34,10 +34,12 @@
           </p>
         <% } %>
       </section>
+      <% if (user && user.role_name === 'admin') { %>
       <div class="page-actions">
         <a href="/edit-project/<%= project.project_id %>" class="btn btn-outline">Edit Project</a>
         <a href="/project/<%= project.project_id %>/assign-categories" class="btn btn-outline">Assign Categories</a>
       </div>
+      <% } %>
     <% } else { %>
       <p>Project not found.</p>
     <% } %>

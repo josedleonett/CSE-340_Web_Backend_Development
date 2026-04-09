@@ -5,9 +5,11 @@
       <p>Browse service projects by category.</p>
     </section>
 
+    <% if (user && user.role_name === 'admin') { %>
     <div class="page-actions">
       <a href="/new-category" class="btn">+ Add Category</a>
     </div>
+    <% } %>
 
     <section class="categories-grid">
       <% categories.forEach(category => { %>

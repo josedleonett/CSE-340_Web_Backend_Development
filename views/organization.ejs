@@ -42,9 +42,11 @@
           <p>No service projects available for this organization.</p>
         <% } %>
       </section>
+      <% if (user && user.role_name === 'admin') { %>
       <div class="page-actions">
         <a href="/edit-organization/<%= organizationDetails.organization_id %>" class="btn btn-outline">Edit Organization</a>
       </div>
+      <% } %>
     <% } else { %>
       <p>Organization not found.</p>
     <% } %>

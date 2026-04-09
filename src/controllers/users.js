@@ -58,3 +58,13 @@ export const showDashboard = (req, res) => {
   const { name, email } = req.session.user;
   res.render('dashboard', { title: 'Dashboard', name, email });
 };
+
+export const requireRole = (role) => {
+  return (req, res, next) => {
+    if (req.session && req.session.user && req.session.user.role_name === role) {
+      return next();
+    }
+    req.flash('error', 'You do not have permission to access that page.');
+    res.redirect('/');
+  };
+};
