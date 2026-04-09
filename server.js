@@ -29,6 +29,11 @@ app.use(session({
 
 app.use(flash);
 
+app.use((req, res, next) => {
+  res.locals.isLoggedIn = !!(req.session && req.session.user);
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(router);

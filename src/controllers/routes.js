@@ -31,6 +31,15 @@ import {
   processAssignCategoriesForm,
 } from './categories.js';
 import { testErrorPage } from './errors.js';
+import {
+  showUserRegistrationForm,
+  processUserRegistrationForm,
+  showLoginForm,
+  processLoginForm,
+  processLogout,
+  requireLogin,
+  showDashboard,
+} from './users.js';
 
 const router = express.Router();
 
@@ -60,5 +69,17 @@ router.get('/edit-category/:id', showEditCategoryForm);
 router.post('/edit-category/:id', categoryValidation, processEditCategoryForm);
 
 router.get('/test-error', testErrorPage);
+
+// Activity 2 Step 4: Registration routes
+router.get('/register', showUserRegistrationForm);
+router.post('/register', processUserRegistrationForm);
+
+// Activity 3 Step 3: Login / logout routes
+router.get('/login', showLoginForm);
+router.post('/login', processLoginForm);
+router.get('/logout', processLogout);
+
+// Activity 4 Steps 3-4: Protected dashboard route
+router.get('/dashboard', requireLogin, showDashboard);
 
 export default router;

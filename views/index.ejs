@@ -23,4 +23,14 @@
       </div>
     </section>
 
+    <% if (isLoggedIn) { %>
+    <section class="features">
+      <div class="feature-card">
+        <h3>My Account</h3>
+        <p>View your personal dashboard and account information.</p>
+        <a href="/dashboard" class="btn">My Dashboard</a>
+      </div>
+    </section>
+    <% } %>
+
 <%- include('partials/footer') %>
