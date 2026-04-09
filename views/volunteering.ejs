@@ -1,0 +1,38 @@
+<%- include('partials/header') %>
+
+    <section class="form-section">
+      <h2>My Volunteering</h2>
+      <% if (projects && projects.length > 0) { %>
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Project</th>
+              <th>Organization</th>
+              <th>Date</th>
+              <th>Location</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% projects.forEach(p => { %>
+              <tr>
+                <td><a href="/project/<%= p.project_id %>"><%= p.title %></a></td>
+                <td><%= p.organization_name %></td>
+                <td><%= new Date(p.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></td>
+                <td><%= p.location %></td>
+                <td>
+                  <form method="POST" action="/project/<%= p.project_id %>/remove-volunteer">
+                    <button type="submit" class="btn btn-outline">Remove</button>
+                  </form>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      <% } else { %>
+        <p style="margin-top: 1rem; color: var(--text-light);">You have not signed up to volunteer for any projects yet.</p>
+        <p style="margin-top: 0.75rem;"><a href="/projects" class="btn">Browse Projects</a></p>
+      <% } %>
+    </section>
+
+<%- include('partials/footer') %>

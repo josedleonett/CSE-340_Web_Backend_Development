@@ -4,9 +4,12 @@
       <h2>Dashboard</h2>
       <p>Welcome, <strong><%= name %></strong>!</p>
       <p>Email: <%= email %></p>
-      <% if (role_name === 'admin') { %>
-        <p style="margin-top: 1.25rem;"><a href="/users" class="btn">View All Users</a></p>
-      <% } %>
+      <div style="margin-top: 1.25rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a href="/volunteering" class="btn">My Volunteering</a>
+        <% if (role_name === 'admin') { %>
+          <a href="/users" class="btn">View All Users</a>
+        <% } %>
+      </div>
     </section>
 
 <%- include('partials/footer') %>

@@ -163,3 +163,11 @@ CREATE TABLE IF NOT EXISTS users (
   role_id INTEGER REFERENCES roles(role_id),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- User volunteers table (many-to-many: users <-> projects)
+CREATE TABLE IF NOT EXISTS user_volunteers (
+  user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+  project_id INTEGER REFERENCES projects(project_id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, project_id)
+);
