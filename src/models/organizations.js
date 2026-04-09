@@ -1,6 +1,6 @@
 import pool from '../database.js';
 
-export async function getAllOrganizations() {
+export const getAllOrganizations = async () => {
   try {
     const result = await pool.query(`
       SELECT organization_id, organization_name, mission, contact_email, phone
@@ -12,9 +12,9 @@ export async function getAllOrganizations() {
     console.error('Error getting organizations:', error);
     throw error;
   }
-}
+};
 
-export async function getOrganizationDetails(organizationId) {
+export const getOrganizationDetails = async (organizationId) => {
   try {
     const result = await pool.query(
       `SELECT organization_id, organization_name, mission, contact_email, phone
@@ -27,9 +27,9 @@ export async function getOrganizationDetails(organizationId) {
     console.error('Error getting organization details:', error);
     throw error;
   }
-}
+};
 
-export async function createOrganization(organizationName, mission, contactEmail, phone) {
+export const createOrganization = async (organizationName, mission, contactEmail, phone) => {
   const result = await pool.query(
     `INSERT INTO organizations (organization_name, mission, contact_email, phone)
      VALUES ($1, $2, $3, $4)
@@ -38,9 +38,9 @@ export async function createOrganization(organizationName, mission, contactEmail
   );
   if (result.rows.length === 0) throw new Error('Failed to create organization');
   return result.rows[0].organization_id;
-}
+};
 
-export async function updateOrganization(id, organizationName, mission, contactEmail, phone) {
+export const updateOrganization = async (id, organizationName, mission, contactEmail, phone) => {
   const result = await pool.query(
     `UPDATE organizations
      SET organization_name = $1, mission = $2, contact_email = $3, phone = $4
@@ -50,5 +50,5 @@ export async function updateOrganization(id, organizationName, mission, contactE
   );
   if (result.rowCount === 0) throw new Error('No organization found with that ID');
   return result.rows[0];
-}
+};
 

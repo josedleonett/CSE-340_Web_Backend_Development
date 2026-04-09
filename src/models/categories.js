@@ -1,6 +1,6 @@
 import pool from '../database.js';
 
-export async function getAllCategories() {
+export const getAllCategories = async () => {
   try {
     const result = await pool.query(`
       SELECT category_id, category_name
@@ -12,9 +12,9 @@ export async function getAllCategories() {
     console.error('Error getting categories:', error);
     throw error;
   }
-}
+};
 
-export async function getCategoryById(categoryId) {
+export const getCategoryById = async (categoryId) => {
   try {
     const result = await pool.query(
       `SELECT category_id, category_name
@@ -27,9 +27,9 @@ export async function getCategoryById(categoryId) {
     console.error('Error getting category by id:', error);
     throw error;
   }
-}
+};
 
-export async function getProjectsByCategory(categoryId) {
+export const getProjectsByCategory = async (categoryId) => {
   try {
     const result = await pool.query(
       `SELECT p.project_id, p.title, p.description, p.date, p.location,
@@ -46,9 +46,9 @@ export async function getProjectsByCategory(categoryId) {
     console.error('Error getting projects by category:', error);
     throw error;
   }
-}
+};
 
-export async function getCategoriesByProject(projectId) {
+export const getCategoriesByProject = async (projectId) => {
   try {
     const result = await pool.query(
       `SELECT c.category_id, c.category_name
@@ -63,9 +63,9 @@ export async function getCategoriesByProject(projectId) {
     console.error('Error getting categories by project:', error);
     throw error;
   }
-}
+};
 
-export async function createCategory(categoryName) {
+export const createCategory = async (categoryName) => {
   try {
     const result = await pool.query(
       `INSERT INTO categories (category_name) VALUES ($1) RETURNING category_id`,
@@ -76,9 +76,9 @@ export async function createCategory(categoryName) {
     console.error('Error creating category:', error);
     throw error;
   }
-}
+};
 
-export async function updateCategory(id, categoryName) {
+export const updateCategory = async (id, categoryName) => {
   try {
     const result = await pool.query(
       `UPDATE categories SET category_name = $1 WHERE category_id = $2 RETURNING *`,
@@ -90,9 +90,9 @@ export async function updateCategory(id, categoryName) {
     console.error('Error updating category:', error);
     throw error;
   }
-}
+};
 
-export async function updateCategoryAssignments(projectId, categoryIds) {
+export const updateCategoryAssignments = async (projectId, categoryIds) => {
   try {
     await pool.query(`DELETE FROM project_categories WHERE project_id = $1`, [projectId]);
     if (categoryIds && categoryIds.length > 0) {
@@ -107,4 +107,4 @@ export async function updateCategoryAssignments(projectId, categoryIds) {
     console.error('Error updating category assignments:', error);
     throw error;
   }
-}
+};

@@ -1,6 +1,6 @@
 import pool from '../database.js';
 
-export async function getAllProjects() {
+export const getAllProjects = async () => {
   try {
     const result = await pool.query(`
       SELECT 
@@ -19,9 +19,9 @@ export async function getAllProjects() {
     console.error('Error getting projects:', error);
     throw error;
   }
-}
+};
 
-export async function getProjectsByOrganization(organizationId) {
+export const getProjectsByOrganization = async (organizationId) => {
   try {
     const result = await pool.query(`
       SELECT 
@@ -41,9 +41,9 @@ export async function getProjectsByOrganization(organizationId) {
     console.error('Error getting projects by organization:', error);
     throw error;
   }
-}
+};
 
-export async function getProjectById(projectId) {
+export const getProjectById = async (projectId) => {
   try {
     const result = await pool.query(`
       SELECT 
@@ -63,9 +63,9 @@ export async function getProjectById(projectId) {
     console.error('Error getting project by id:', error);
     throw error;
   }
-}
+};
 
-export async function getUpcomingProjects(number_of_projects) {
+export const getUpcomingProjects = async (number_of_projects) => {
   try {
     const result = await pool.query(
       `SELECT
@@ -88,9 +88,9 @@ export async function getUpcomingProjects(number_of_projects) {
     console.error('Error getting upcoming projects:', error);
     throw error;
   }
-}
+};
 
-export async function getProjectDetails(id) {
+export const getProjectDetails = async (id) => {
   try {
     const result = await pool.query(
       `SELECT
@@ -111,9 +111,9 @@ export async function getProjectDetails(id) {
     console.error('Error getting project details:', error);
     throw error;
   }
-}
+};
 
-export async function createProject(title, description, location, date, organizationId) {
+export const createProject = async (title, description, location, date, organizationId) => {
   try {
     const result = await pool.query(
       `INSERT INTO projects (title, description, location, date, organization_id)
@@ -126,9 +126,9 @@ export async function createProject(title, description, location, date, organiza
     console.error('Error creating project:', error);
     throw error;
   }
-}
+};
 
-export async function updateProject(id, title, description, date, location, organizationId) {
+export const updateProject = async (id, title, description, date, location, organizationId) => {
   const result = await pool.query(
     `UPDATE projects
      SET title = $1, description = $2, date = $3, location = $4, organization_id = $5
@@ -140,4 +140,4 @@ export async function updateProject(id, title, description, date, location, orga
     throw new Error('No project found with that ID');
   }
   return result.rows[0];
-}
+};
