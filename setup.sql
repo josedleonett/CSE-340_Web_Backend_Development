@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS projects (
   description TEXT,
   location VARCHAR(255),
   date DATE,
-  FOREIGN KEY (organization_id) REFERENCES organizations(organization_id)
+  FOREIGN KEY (organization_id) REFERENCES organizations(organization_id),
+  UNIQUE (organization_id, title)
 );
 
 -- Sample data for organizations
