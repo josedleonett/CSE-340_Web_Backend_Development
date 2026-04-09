@@ -141,3 +141,38 @@ export const updateProject = async (id, title, description, date, location, orga
   }
   return result.rows[0];
 };
+
+export const addVolunteer = async (userId, projectId) => {
+  await pool.query(
+    `INSERT INTO user_volunteers (user_id, project_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+    [userId, projectId]
+  );
+};
+
+export const removeVolunteer = async (userId, projectId) => {
+  await pool.query(
+    `DELETE FROM user_volunteers WHERE user_id = $1 AND project_id = $2`,
+    [userId, projectId]
+  );
+};
+
+export const getVolunteeredProjects = async (userId) => {
+  const result = await pool.query(
+    `SELECT p.project_id, p.title, p.description, p.date, p.location, o.organization_name
+     FROM projects p
+     JOIN user_volunteers uv ON p.project_id = uv.project_id
+     JOIN organizations o ON p.organization_id = o.organization_id
+     WHERE uv.user_id = $1
+     ORDER BY p.date ASC`,
+    [userId]
+  );
+  return result.rows;
+};
+
+export const isUserVolunteered = async (userId, projectId) => {
+  const result = await pool.query(
+    `SELECT 1 FROM user_volunteers WHERE user_id = $1 AND project_id = $2`,
+    [userId, projectId]
+  );
+  return result.rowCount > 0;
+};

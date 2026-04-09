@@ -18,6 +18,9 @@ import {
   processNewProjectForm,
   showEditProjectForm,
   processEditProjectForm,
+  processAddVolunteer,
+  processRemoveVolunteer,
+  showVolunteeringPage,
 } from './projects.js';
 import {
   categoryValidation,
@@ -56,6 +59,8 @@ router.post('/edit-organization/:id', requireRole('admin'), organizationValidati
 
 router.get('/projects', showProjectsPage);
 router.get('/project/:id', showProjectDetailsPage);
+router.post('/project/:id/volunteer', requireLogin, processAddVolunteer);
+router.post('/project/:id/remove-volunteer', requireLogin, processRemoveVolunteer);
 router.get('/new-project', requireRole('admin'), showNewProjectForm);
 router.post('/new-project', requireRole('admin'), projectValidation, processNewProjectForm);
 router.get('/edit-project/:id', requireRole('admin'), showEditProjectForm);
@@ -80,6 +85,8 @@ router.post('/login', processLoginForm);
 router.get('/logout', processLogout);
 
 router.get('/dashboard', requireLogin, showDashboard);
+
+router.get('/volunteering', requireLogin, showVolunteeringPage);
 
 router.get('/users', requireLogin, requireRole('admin'), showUsersPage);
 
