@@ -1,0 +1,25 @@
+<%- include('partials/header') %>
+
+    <section class="form-section">
+      <h2>Registered Users</h2>
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach(u => { %>
+            <tr>
+              <td><%= u.name %></td>
+              <td><%= u.email %></td>
+              <td><span class="role-badge role-<%= u.role_name %>"><%= u.role_name %></span></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </section>
+
+<%- include('partials/footer') %>

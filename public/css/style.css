@@ -412,6 +412,53 @@ form button[type="submit"]:hover {
   text-decoration: underline;
 }
 
+/* ===== Users Table ===== */
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.25rem;
+  font-size: 0.95rem;
+}
+
+.users-table th,
+.users-table td {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.users-table thead th {
+  background-color: var(--bg-color);
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+}
+
+.users-table tbody tr:hover {
+  background-color: #f3f4f6;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.role-badge.role-admin {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.role-badge.role-user {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
 /* ===== Checkboxes ===== */
 .form-check {
   display: flex;

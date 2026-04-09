@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
-import { createUser } from '../models/users.js';
-import { authenticateUser } from '../models/users.js';
+import { createUser, authenticateUser, getAllUsers } from '../models/users.js';
 
 const SALT_ROUNDS = 10;
 
@@ -56,8 +55,19 @@ export const requireLogin = (req, res, next) => {
 };
 
 export const showDashboard = (req, res) => {
-  const { name, email } = req.session.user;
-  res.render('dashboard', { title: 'Dashboard', name, email });
+  const { name, email, role_name } = req.session.user;
+  res.render('dashboard', { title: 'Dashboard', name, email, role_name });
+};
+
+export const showUsersPage = async (req, res) => {
+  try {
+    const users = await getAllUsers();
+    res.render('users', { title: 'Users', users });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    req.flash('error', 'Failed to load users.');
+    res.redirect('/dashboard');
+  }
 };
 
 export const requireRole = (role) => {

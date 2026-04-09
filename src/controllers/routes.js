@@ -40,6 +40,7 @@ import {
   requireLogin,
   requireRole,
   showDashboard,
+  showUsersPage,
 } from './users.js';
 
 const router = express.Router();
@@ -48,7 +49,6 @@ router.get('/', showHomePage);
 
 router.get('/organizations', showOrganizationsPage);
 router.get('/organization/:id', showOrganizationDetailsPage);
-// Team Activity Step 8: admin-only organization routes
 router.get('/new-organization', requireRole('admin'), showNewOrganizationForm);
 router.post('/new-organization', requireRole('admin'), organizationValidation, processNewOrganizationForm);
 router.get('/edit-organization/:id', requireRole('admin'), showEditOrganizationForm);
@@ -72,16 +72,15 @@ router.post('/edit-category/:id', requireRole('admin'), categoryValidation, proc
 
 router.get('/test-error', testErrorPage);
 
-// Activity 2 Step 4: Registration routes
 router.get('/register', showUserRegistrationForm);
 router.post('/register', processUserRegistrationForm);
 
-// Activity 3 Step 3: Login / logout routes
 router.get('/login', showLoginForm);
 router.post('/login', processLoginForm);
 router.get('/logout', processLogout);
 
-// Activity 4 Steps 3-4: Protected dashboard route
 router.get('/dashboard', requireLogin, showDashboard);
+
+router.get('/users', requireLogin, requireRole('admin'), showUsersPage);
 
 export default router;
